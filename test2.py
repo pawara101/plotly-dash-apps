@@ -1,27 +1,25 @@
-# Import packages
-from dash import Dash, html, dash_table,dcc
+from dash import Dash, html, dcc, callback, Output, Input
 import pandas as pd
 import plotly.express as px
 
-# Incorporate data
 df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder_unfiltered.csv')
-df_afg = df.loc[df['country'] == "Afghanistan"]
-df_can = df.loc[df['country'] == "Canada"]
 
-# Initialize the app
 app = Dash(__name__)
 
-# App layout
 app.layout = html.Div([
-    html.Div(children='AFG'),
-    # dash_table.DataTable(data=df.to_dict(), page_size=10)
-    dcc.Graph(figure=px.line(df_afg['year'],df_afg['lifeExp'])),
-    html.Div(children='CAN'),
-    # dash_table.DataTable(data=df.to_dict(), page_size=10)
-    dcc.Graph(figure=px.line(df_can['year'],df_can['lifeExp']))
+    html.H1(children='Title of Dash App', style={'textAlign':'center'}),
+    dcc.Dropdown(df.country.unique(), 'Canada', id='drop-down-selection'),
+    dcc.Graph(id='graph-content')
 ])
 
-# Run the app
+@callback(
+    Output('graph-content','figure'),
+    Input('drop-down-selection','value')
+)
+def update_graph(value):
+    df_set = df[df.country == value]
+    return px.line(df_set,x='year',y='pop')
+
 if __name__ == '__main__':
     app.run(debug=True)
 
